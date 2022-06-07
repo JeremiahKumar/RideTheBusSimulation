@@ -84,8 +84,8 @@ namespace Bus
         /// 
         /// Current game state will continuously update to match validation status.
         /// 
-        /// Since this method goes through the deck only once, it stops X-1 indices away from the Deck length, where X is the amount of validators,
-        /// as otherwise there would be X validators but only X-1 remaining cards and a win is impossible).
+        /// Since this method goes through the deck only once it stops X-1 indices away from the Deck length (where X is the amount of validators)
+        /// This is because if it kept going, there would be X validators but only X-1 remaining cards and a win is impossible.
         /// </summary>
         /// <param name="guess"></param>
         /// <returns></returns>
