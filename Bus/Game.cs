@@ -84,14 +84,14 @@ namespace Bus
         /// 
         /// Current game state will continuously update to match validation status.
         /// 
-        /// Since this method goes through the deck only once, it stops 4 indices away from the Deck length (as there would only be three remaining cards and
-        /// a win is impossible).
+        /// Since this method goes through the deck only once, it stops X-1 indices away from the Deck length, where X is the amount of validators,
+        /// as otherwise there would be X validators but only X-1 remaining cards and a win is impossible).
         /// </summary>
         /// <param name="guess"></param>
         /// <returns></returns>
         private bool RunThroughDeckOnce(string guess)
         {
-            for (int i = 0; i < _deck.GetDeckLength()-4; i++)
+            for (int i = 0; i < _deck.GetDeckLength()-_cardValidators.Length; i++)
             {
                 for (int j = 0; j < _cardValidators.Length; j++)
                 {
