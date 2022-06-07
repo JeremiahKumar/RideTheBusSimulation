@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Linq;
+using Bus.Enums;
+using Bus.Helpers;
 
 namespace Bus.Models
 {
-    public class Card : CardConstraints
+    public class Card
     {
         public readonly Suit Suit;
         public readonly string _value;
         
         public Card(Suit suit, string value)
         {
-            if (!_possibleValues.Contains(value))
+            if (!CardConstraintsSingleton.PossibleValues.Contains(value))
             {
                 throw new Exception($"value {value} is not accepted as a possible card value");
             }

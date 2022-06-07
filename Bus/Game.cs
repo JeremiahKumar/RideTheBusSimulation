@@ -1,170 +1,119 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Bus.Enums;
 using Bus.Models;
+using Bus.Validators;
 
 namespace Bus
 {
     public class Game
     {
-        private readonly int sample_size;
-        private readonly Deck deck;
+        private readonly int _sampleSize;
+        private readonly Deck _deck;
         private Card[] _currentGameState = new Card[4];
-        private Dictionary<String, int> full_sim_stats;
+        private readonly Dictionary<String, int> _percentageWinOneDeckStats;
+        private readonly ICardValidator[] _cardValidators;
+        private readonly GuessValidator _guessValidator;
+        private readonly string[] _possibleGuesses;
 
         public Game(int sampleSize)
         {
-            sample_size = sampleSize;
-            deck = new Deck();
-            full_sim_stats = new Dictionary<string, int>();
+            _sampleSize = sampleSize;
+            _deck = new Deck();
+            _percentageWinOneDeckStats = new Dictionary<string, int>();
+            _guessValidator = new GuessValidator();
+            
+            _cardValidators = new ICardValidator[]
+            {
+                new RedBlackValidator(),
+                new HigherLowerValidator(),
+                new InsideOutsideValidator(),
+                new SameDifferentValidator()
+            };
+
+            _possibleGuesses = new[]
+            {
+                "rhis", "rhid", "rhos", "rhod",
+                "rlis", "rlid", "rlos", "rlod",
+                "bhis", "bhid", "bhos", "bhod",
+                "blis", "blid", "blos", "blod"
+            };
         }
 
-        public void FullSimulation()
+        public void GetPercentageSuccessOneDeckFullSim()
         {
-            var sortedDict = from entry in full_sim_stats orderby entry.Value ascending select entry;
+            foreach (var guess in _possibleGuesses)
+            {
+                GetPercentageSuccessOneDeck(guess);
+            }
+
+            var sortedDict = from entry in _percentageWinOneDeckStats orderby entry.Value descending select entry;
             
             foreach (KeyValuePair<string, int> kvp in sortedDict)
             {
-                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+                Console.WriteLine("Guess = {0}, Percentage success = {1}%", kvp.Key, kvp.Value);
             }
         }
 
-        public void SimulateHand(RedBlack rb, HigherLower hl, InsideOutside io, SameDifferent sd)
+        private void GetPercentageSuccessOneDeck (string guess)
         {
-            deck.Shuffle();
-            var count = 0;
-            for (int i = 0; i < sample_size; i++)
+            if (!_guessValidator.ValidateGuess(guess))
             {
-                if (RunThroughDeckOnce(rb, hl, io, sd))
+                throw new Exception($"Guess {guess} is incorrectly formatted, please fix");
+            }
+            
+            _deck.Shuffle();
+            var count = 0;
+            for (int i = 0; i < _sampleSize; i++)
+            {
+                if (RunThroughDeckOnce(guess))
                 {
                     count++;
                 }
-                deck.Shuffle();
+                _deck.Shuffle();
             }
-
-            var key = rb.ToString() + hl.ToString() + io.ToString() + sd.ToString();
-            var value = (int)Math.Round((double)(100 * count) / sample_size);
-            full_sim_stats.Add(key,value);
-
-            // Console.WriteLine( $"Ran guess {key} {sample_size} times. " +
-            //        $"{count} times won, this is {value} percent.");
+            
+            var percentSuccess = (int)Math.Round((double)(100 * count) / _sampleSize);
+            _percentageWinOneDeckStats.Add(guess, percentSuccess);
+            
         }
 
-        private bool RunThroughDeckOnce(RedBlack rb, HigherLower hl, InsideOutside io, SameDifferent sd)
+        /// <summary>
+        /// This method will go through the Deck one time, checking all validation rules in order and moving the iterator through the deck at a success.
+        /// If all validators pass this will exit early as a match has been found.
+        /// 
+        /// Current game state will continuously update to match validation status.
+        /// 
+        /// Since this method goes through the deck only once, it stops 4 indices away from the Deck length (as there would only be three remaining cards and
+        /// a win is impossible).
+        /// </summary>
+        /// <param name="guess"></param>
+        /// <returns></returns>
+        private bool RunThroughDeckOnce(string guess)
         {
-            for (int i = 0; i < deck.GetDeckLength()-4; i++)
+            for (int i = 0; i < _deck.GetDeckLength()-4; i++)
             {
-                if (CheckRedBlack(deck.GetCardAtIndex(i),rb))
+                for (int j = 0; j < _cardValidators.Length; j++)
                 {
-                    _currentGameState[0] = deck.GetCardAtIndex(i);
-                    i++;
-                }
-                else
-                {
-                    _currentGameState = new Card[4];
-                    continue;
-                }
-
-                if (CheckHigherLower(deck.GetCardAtIndex(i), hl))
-                {
-                    _currentGameState[1] = deck.GetCardAtIndex(i);
-                    i++;
-                }
-                else
-                {
-                    _currentGameState = new Card[4];
-                    continue;
-                }
-                
-                if (CheckInsideOutside(deck.GetCardAtIndex(i),io))
-                {
-                    _currentGameState[2] = deck.GetCardAtIndex(i);
-                    i++;
-                }
-                else
-                {
-                    _currentGameState = new Card[4];
-                    continue;
-                }
-                
-                if (CheckSameDifferent(deck.GetCardAtIndex(i),sd))
-                {
-                    return true;
-                }
-                else
-                {
-                    _currentGameState = new Card[4];
+                    if (_cardValidators[j].Validate(_deck.GetCardAtIndex(i), guess, _currentGameState))
+                    {
+                        // last validator has passed
+                        if (j == 3)
+                        {
+                            return true;
+                        }
+                        _currentGameState[j] = _deck.GetCardAtIndex(i);
+                        i++;
+                    } 
+                    else
+                    { 
+                        // A validator failed, reset game state and stop validation loop
+                        _currentGameState = new Card[4];
+                        break;
+                    }
                 }
             }
-
             return false;
         }
-
-        private bool CheckRedBlack(Card card, RedBlack rb)
-        {
-            var cardColor = RedBlack.Red;
-            
-            if (card.Suit == Suit.Spades || card.Suit == Suit.Clubs)
-            {
-                cardColor = RedBlack.Black;
-            }
-
-            return cardColor == rb;
-        }
-        
-        private bool CheckHigherLower(Card card, HigherLower hl)
-        {
-            var cardHigherLower = HigherLower.Higher;
-            var currentValue = card.GetValue();
-
-            if (currentValue == _currentGameState[0].GetValue())
-            {
-                return false;
-            }
-            
-            if (currentValue < _currentGameState[0].GetValue())
-            {
-                cardHigherLower = HigherLower.Lower;
-            }
-
-            return cardHigherLower == hl;
-        }
-        
-        private bool CheckInsideOutside(Card card, InsideOutside io)
-        {
-            var cardInsideOutside = InsideOutside.Inside;
-            var currentValue = card.GetValue();
-
-            if (currentValue == _currentGameState[0].GetValue() || currentValue == _currentGameState[1].GetValue())
-            {
-                return false;
-            }
-
-            int lowerValue = Math.Min(_currentGameState[0].GetValue(), _currentGameState[1].GetValue());
-            int higherValue = Math.Max(_currentGameState[0].GetValue(), _currentGameState[1].GetValue());
-            
-            if (currentValue < lowerValue || currentValue > higherValue)
-            {
-                cardInsideOutside = InsideOutside.Outside;
-            }
-
-            return cardInsideOutside == io;
-        }
-        
-        private bool CheckSameDifferent(Card card, SameDifferent sd)
-        {
-            var cardSameDifferent = SameDifferent.Same;
-            
-            if (card.Suit != _currentGameState[0].GetSuit() 
-                && card.Suit != _currentGameState[1].GetSuit() 
-                && card.Suit != _currentGameState[2].GetSuit())
-            {
-                cardSameDifferent = SameDifferent.Different;
-            }
-
-            return cardSameDifferent == sd;
-        }
-
     }
 }

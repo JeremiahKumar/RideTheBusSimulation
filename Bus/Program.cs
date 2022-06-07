@@ -1,6 +1,4 @@
-﻿using System;
-using Bus.Enums;
-using Bus.Models;
+﻿using Bus.Helpers;
 
 namespace Bus
 {
@@ -8,8 +6,11 @@ namespace Bus
     {
         public static void Main(string[] args)
         {
+            CardConstraintsSingleton availableCards = CardConstraintsSingleton.Instance;
             var game = new Game(10000);
-            game.SimulateHand(RedBlack.Red, HigherLower.Higher, InsideOutside.Inside, SameDifferent.Different);
+            game.GetPercentageSuccessOneDeckFullSim();
+            
+            //TODO Make a version that goes through multiple decks (up to limit). This will need to count how many failures before success is hit
         }
     }
 }

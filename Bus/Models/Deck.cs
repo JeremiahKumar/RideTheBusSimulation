@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Linq;
 using Bus.Enums;
+using Bus.Helpers;
 
 namespace Bus.Models
 {
-    public class Deck : CardConstraints
+    public class Deck
     {
         private readonly Card[] _cards = new Card[52];
         public Deck()
         {
+            
             int i = 0;
             foreach (var suit in Enum.GetValues(typeof(Suit)).Cast<Suit>())
             {
-                foreach(var value in base._possibleValues)
+                foreach(var value in CardConstraintsSingleton.PossibleValues)
                 {
                     _cards[i] = new Card(suit, value);
                     i++;

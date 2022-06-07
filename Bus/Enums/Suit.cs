@@ -1,4 +1,4 @@
-﻿namespace Bus.Models
+﻿namespace Bus.Enums
 {
     public enum Suit
     {
