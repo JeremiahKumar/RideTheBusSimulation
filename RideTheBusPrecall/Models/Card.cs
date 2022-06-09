@@ -7,9 +7,9 @@ namespace Bus.Models
 {
     public class Card
     {
-        public readonly Suit Suit;
+        public readonly Suit _suit;
         public readonly string _value;
-        
+
         public Card(Suit suit, string value)
         {
             if (!CardConstraintsSingleton.PossibleValues.Contains(value))
@@ -17,12 +17,12 @@ namespace Bus.Models
                 throw new Exception($"value {value} is not accepted as a possible card value");
             }
             
-            Suit = suit;
+            _suit = suit;
             _value = value;
         }
         public override string ToString()
         {
-            return $"{_value} of {Suit}";
+            return $"{_value} of {_suit}";
         }
 
         public int GetValue()
@@ -44,7 +44,7 @@ namespace Bus.Models
 
         public Suit GetSuit()
         {
-            return Suit;
+            return _suit;
         }
     }
 }
