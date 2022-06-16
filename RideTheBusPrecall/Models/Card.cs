@@ -5,6 +5,7 @@ using Bus.Helpers;
 
 namespace Bus.Models
 {
+    //TODO convert the card to store the int value and use the letters as a presentation only
     public class Card
     {
         public readonly Suit _suit;
