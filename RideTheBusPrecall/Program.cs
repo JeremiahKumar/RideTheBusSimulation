@@ -5,8 +5,8 @@
         public static void Main(string[] args)
         {
             var game = new Game(10000, 100);
-            game.GetPercentageSuccessOneDeckFullSim();
-            game.GetFailureRateAverageMultiDeckFullSim();
+            game.GetSuccessPercentagesOneDeck();
+            game.GetFailurePercentagesMultiDeck();
         }
     }
 }

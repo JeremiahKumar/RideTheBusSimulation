@@ -9,7 +9,7 @@ namespace Bus.Validators
         {
             var cardColor = 'r';
             
-            if (card._suit == Suit.Spades || card._suit == Suit.Clubs)
+            if (card.Suit == Suit.Spades || card.Suit == Suit.Clubs)
             {
                 cardColor = 'b';
             }

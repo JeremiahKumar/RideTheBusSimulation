@@ -1,29 +1,28 @@
 ﻿using System;
 using System.Linq;
+using Bus.Constants;
 using Bus.Enums;
-using Bus.Helpers;
-
 namespace Bus.Models
 {
     //TODO convert the card to store the int value and use the letters as a presentation only
     public class Card
     {
-        public readonly Suit _suit;
-        public readonly string _value;
+        public readonly Suit Suit;
+        private readonly string _value;
 
         public Card(Suit suit, string value)
         {
-            if (!CardConstraintsSingleton.PossibleValues.Contains(value))
+            if (!ApplicationConstants.PossibleCardValues.Contains(value))
             {
                 throw new Exception($"value {value} is not accepted as a possible card value");
             }
             
-            _suit = suit;
+            Suit = suit;
             _value = value;
         }
         public override string ToString()
         {
-            return $"{_value} of {_suit}";
+            return $"{_value} of {Suit}";
         }
 
         public int GetValue()
@@ -45,7 +44,7 @@ namespace Bus.Models
 
         public Suit GetSuit()
         {
-            return _suit;
+            return Suit;
         }
     }
 }

@@ -31,7 +31,7 @@ Simply create a `Game` object with a sample size you would like to run against (
 After this is done, call one of the methods listed below and these will print results to the console.
 
 ## Methods
-The first method is `GetPercentageSuccessOneDeckFullSim` which will run all possible precall hands against a shuffled deck of cards and print the success rates as percentages.
+The first method is `GetSuccessPercentagesOneDeck` which will run all possible precall hands against a shuffled deck of cards and print the success rates as percentages.
 
-The second method is `GetFailureRateAverageMultiDeckFullSim` which will run all possible precall hands against a shuffled deck of cards, reshuffling and restarting upon the deck running out. This reshuffling will occur `maxShuffles` 
+The second method is `GetFailurePercentagesMultiDeck` which will run all possible precall hands against a shuffled deck of cards, reshuffling and restarting upon the deck running out. This reshuffling will occur `maxShuffles` 
 amount of times and this method will return how many failures it took beforethe hand passed. 

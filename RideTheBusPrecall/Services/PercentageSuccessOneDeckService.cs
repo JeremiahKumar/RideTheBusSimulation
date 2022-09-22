@@ -10,14 +10,16 @@ namespace Bus.Services
         private readonly int _sampleSize;
         private readonly Deck _deck;
         private readonly ICardValidator[] _cardValidators;
-        private readonly GuessValidator _guessValidator;
         private Card[] _currentGameState = new Card[4];
         
+        /// <summary>
+        /// This class will simulate the percentage successes over one deck run through for a given guess.
+        /// </summary>
+        /// <param name="sampleSize"></param>
         public PercentageSuccessOneDeckService(int sampleSize)
         {
             _sampleSize = sampleSize;
             _deck = new Deck();
-            _guessValidator = new GuessValidator();
             _cardValidators = new ICardValidator[]
             {
                 new RedBlackValidator(),
@@ -34,9 +36,9 @@ namespace Bus.Services
         /// <param name="guess"></param>
         /// <returns>KeyValuePair of guess and success rate</returns>
         /// <exception cref="Exception"></exception>
-        public KeyValuePair<string,int> GetPercentageSuccessOneDeck(string guess)
+        public KeyValuePair<string,int> GetSuccessPercentageForGuess(string guess)
         {
-            if (!_guessValidator.ValidateGuess(guess))
+            if (!GuessValidator.ValidateGuess(guess))
             {
                 throw new Exception($"Guess {guess} is incorrectly formatted, please fix");
             }
@@ -73,13 +75,15 @@ namespace Bus.Services
         {
             var finalDeckIndex = _deck.GetDeckLength() - _cardValidators.Length;
             
+            // For each card
             for (int i = 0; i < finalDeckIndex; i++)
             {
+                // Go through each validator
                 for (int j = 0; j < _cardValidators.Length; j++)
                 {
                     if (_cardValidators[j].Validate(_deck.GetCardAtIndex(i), guess, _currentGameState))
                     {
-                        // last validator has passed
+                        // Last validator has passed, success!
                         if (j == 3)
                         {
                             return true;

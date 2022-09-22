@@ -8,9 +8,9 @@ namespace Bus.Validators
         {
             var cardSameDifferent = 's';
             
-            if (card._suit != currentState[0].GetSuit() 
-                && card._suit != currentState[1].GetSuit() 
-                && card._suit != currentState[2].GetSuit())
+            if (card.Suit != currentState[0].GetSuit() 
+                && card.Suit != currentState[1].GetSuit() 
+                && card.Suit != currentState[2].GetSuit())
             {
                 cardSameDifferent = 'd';
             }

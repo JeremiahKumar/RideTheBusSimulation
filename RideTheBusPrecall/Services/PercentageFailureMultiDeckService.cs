@@ -5,21 +5,24 @@ using Bus.Validators;
 
 namespace Bus.Services
 {
-    public class FailureRateMultiDeckService
+    public class PercentageFailureMultiDeckService
     {
         private readonly int _sampleSize;
         private readonly int _maxShuffles;
         private readonly Deck _deck;
         private readonly ICardValidator[] _cardValidators;
-        private readonly GuessValidator _guessValidator;
         private Card[] _currentGameState = new Card[4];
         
-        public FailureRateMultiDeckService(int sampleSize, int maxShuffles)
+        /// <summary>
+        /// This class will simulate the amount of failures it takes before a guess succeeds over multiple deck runs.
+        /// </summary>
+        /// <param name="sampleSize"></param>
+        /// <param name="maxShuffles"></param>
+        public PercentageFailureMultiDeckService(int sampleSize, int maxShuffles)
         {
             _sampleSize = sampleSize;
             _maxShuffles = maxShuffles;
             _deck = new Deck();
-            _guessValidator = new GuessValidator();
             _cardValidators = new ICardValidator[]
             {
                 new RedBlackValidator(),
@@ -36,9 +39,9 @@ namespace Bus.Services
         /// <param name="guess"></param>
         /// <returns>KeyValuePair of guess and failure rate</returns>
         /// <exception cref="Exception"></exception>
-        public KeyValuePair<string,long> GetFailureRateMultiDeck(string guess)
+        public KeyValuePair<string,long> GetFailureCountForGuess(string guess)
         {
-            if (!_guessValidator.ValidateGuess(guess))
+            if (!GuessValidator.ValidateGuess(guess))
             {
                 throw new Exception($"Guess {guess} is incorrectly formatted, please fix");
             }
@@ -52,9 +55,9 @@ namespace Bus.Services
                 _deck.Shuffle();
             }
             
-            var percentSuccess = failureSum / _sampleSize;
+            var percentFailure = failureSum / _sampleSize;
             
-            return new KeyValuePair<string,long>(guess, percentSuccess);
+            return new KeyValuePair<string,long>(guess, percentFailure);
         }
         
         /// <summary>
@@ -65,7 +68,7 @@ namespace Bus.Services
         /// Since this method goes through the deck multiple times it uses an if statement at the start of the loop to check if it is in an impossible index. If so
         /// that means we need to reset the index and shuffle the cards and continue. This continues until the max shuffle count is reached.
         ///
-        /// Note that  if a validator succeeded on index51, the code will still shuffle the deck on 52 and current game state will be wiped and restarted. This is consistent
+        /// Note that if a validator succeeded on index 51, the code will still shuffle the deck on 52 and current game state will be wiped and restarted. This is consistent
         /// with the game rules outlined on the README
         /// </summary>
         /// <param name="guess"></param>
@@ -75,9 +78,10 @@ namespace Bus.Services
             var shuffleCount = 0;
             var failureCount = 0;
             
+            // For each card in the deck
             for (int i = 0; i <= _deck.GetDeckLength(); i++)
             {
-                // If a Validator has failed and we are starting again at index 52, reset the deck.
+                // If a Validator has failed and we are starting again at index 52, reset the deck and deck iterator.
                 if (i == _deck.GetDeckLength())
                 {
                     HandleShuffle(shuffleCount,guess,failureCount);
@@ -85,9 +89,11 @@ namespace Bus.Services
                     shuffleCount++;
                 }
                 
+                // Go through all the validators
                 for (int j = 0; j < _cardValidators.Length; j++)
                 {
-                    // If a Validator has succeeded but we are starting again at index 52, reset the deck, add a failure count and restart the game state.
+                    // If a Validator has succeeded but we are starting again at index 52, reset the deck and deck iterator,
+                    // add to the failure count and restart the game state.
                     if (i == _deck.GetDeckLength())
                     {
                         HandleShuffle(shuffleCount,guess,failureCount);
@@ -100,7 +106,7 @@ namespace Bus.Services
                     
                     if (_cardValidators[j].Validate(_deck.GetCardAtIndex(i), guess, _currentGameState))
                     {
-                        // last validator has passed
+                        // Last validator has passed, success!
                         if (j == 3)
                         {
                             return failureCount;

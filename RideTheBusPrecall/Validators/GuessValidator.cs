@@ -2,13 +2,13 @@
 {
     public class GuessValidator
     {
-        public bool ValidateGuess(string guess)
+        public static bool ValidateGuess(string guess)
         {
             if (guess.Length != 4)
             {
                 return false;
             }
-            string lowercaseGuess = guess.ToLower();
+            var lowercaseGuess = guess.ToLower();
 
             if ( (lowercaseGuess[0] != 'r' && lowercaseGuess[0] != 'b') 
                 || (lowercaseGuess[1] != 'h' && lowercaseGuess[1] != 'l') 
