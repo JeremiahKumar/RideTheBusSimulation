@@ -4,13 +4,12 @@ using Bus.Constants;
 using Bus.Enums;
 namespace Bus.Models
 {
-    //TODO convert the card to store the int value and use the letters as a presentation only
     public class Card
     {
         public readonly Suit Suit;
-        private readonly string _value;
+        private readonly int _value;
 
-        public Card(Suit suit, string value)
+        public Card(Suit suit, int value)
         {
             if (!ApplicationConstants.PossibleCardValues.Contains(value))
             {
@@ -27,19 +26,7 @@ namespace Bus.Models
 
         public int GetValue()
         {
-            switch (_value)
-            {
-                case "A":
-                    return 1;
-                case "J":
-                    return 11;
-                case "Q":
-                    return 12;
-                case "K":
-                    return 13;
-                default:
-                    return Int32.Parse(_value);
-            }
+            return _value;
         }
 
         public Suit GetSuit()
